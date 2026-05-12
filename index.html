@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ask Ellen AI ✦</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #F7F2EA;
+    --dark: #1C1C1A;
+    --green: #3A5C39;
+    --green-light: #D4E6D3;
+    --warm: #8B6914;
+    --warm-light: #FFF8EE;
+    --warm-border: #E8D5B0;
+    --muted: #888;
+    --border: #E5DDD0;
+    --white: #FDFAF5;
+  }
+
+  html, body { height: 100%; background: var(--cream); font-family: 'DM Sans', sans-serif; color: var(--dark); overflow: hidden; }
+
+  .shell { display: grid; grid-template-columns: 320px 1fr; height: 100vh; }
+
+  /* SIDEBAR */
+  .sidebar {
+    background: var(--dark); display: flex; flex-direction: column;
+    padding: 36px 28px; position: relative; overflow-y: auto;
+  }
+  .sidebar::before {
+    content: ''; position: absolute; top: -60px; right: -60px;
+    width: 220px; height: 220px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(58,92,57,0.2) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .back-link {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12px; font-weight: 600; color: #555; text-decoration: none;
+    letter-spacing: 0.5px; margin-bottom: 40px; transition: color 0.2s;
+  }
+  .back-link:hover { color: var(--green-light); }
+
+  .s-avatar {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--green), #2C3E2C);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; margin-bottom: 16px;
+  }
+  .s-name { font-family: 'DM Serif Display', serif; font-size: 26px; color: #F7F2EA; margin-bottom: 4px; }
+  .s-role { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--green-light); margin-bottom: 20px; }
+  .s-bio { font-size: 13px; line-height: 1.75; color: #666; margin-bottom: 28px; }
+  .s-bio em { color: #AAA; font-style: normal; font-weight: 600; }
+
+  .chips-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #3A3A3A; margin-bottom: 10px; }
+  .chips { display: flex; flex-direction: column; gap: 7px; margin-bottom: 28px; }
+  .chip {
+    background: #181818; border: 1px solid #252525; color: #888;
+    border-radius: 8px; padding: 9px 13px; font-size: 12px; font-weight: 500;
+    cursor: pointer; text-align: left; font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s; line-height: 1.4;
+  }
+  .chip:hover { background: #1E2E1E; border-color: var(--green); color: var(--green-light); }
+
+  .s-footer { margin-top: auto; padding-top: 20px; border-top: 1px solid #1E1E1E; }
+  .s-contact { font-size: 12px; color: #3A3A3A; line-height: 1.7; }
+  .s-contact a { color: var(--green-light); text-decoration: none; font-weight: 600; }
+  .s-disclaimer { font-size: 10px; color: #2E2E2E; margin-top: 8px; line-height: 1.5; }
+
+  /* CHAT */
+  .chat { display: flex; flex-direction: column; background: var(--white); }
+
+  .topbar {
+    padding: 18px 28px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+  }
+  .dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+  .topbar-txt { font-size: 13px; color: var(--muted); }
+  .topbar-txt strong { color: var(--dark); font-weight: 600; }
+
+  .msgs {
+    flex: 1; overflow-y: auto; padding: 28px;
+    display: flex; flex-direction: column; gap: 18px; scroll-behavior: smooth;
+  }
+  .msgs::-webkit-scrollbar { width: 4px; }
+  .msgs::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* Setup banner */
+  .setup {
+    background: var(--warm-light); border: 1px solid var(--warm-border);
+    border-radius: 14px; padding: 20px; font-size: 13px; color: var(--warm);
+    display: none; line-height: 1.6;
+  }
+  .setup.show { display: block; }
+  .setup strong { font-weight: 700; }
+  .setup a { color: var(--warm); font-weight: 700; }
+  .steps { margin: 12px 0 0; display: flex; flex-direction: column; gap: 7px; }
+  .step { display: flex; gap: 9px; font-size: 12px; color: #A07820; align-items: flex-start; }
+  .step-n {
+    width: 19px; height: 19px; background: var(--warm); color: white;
+    border-radius: 50%; font-size: 10px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
+  }
+  .key-row { display: flex; gap: 8px; margin-top: 16px; }
+  .key-in {
+    flex: 1; border: 1px solid var(--warm-border); border-radius: 8px;
+    padding: 9px 12px; font-size: 12px; font-family: monospace;
+    background: #FFFCF5; color: var(--dark); outline: none;
+  }
+  .key-btn {
+    background: var(--warm); color: white; border: none; border-radius: 8px;
+    padding: 9px 16px; font-size: 12px; font-weight: 700;
+    cursor: pointer; font-family: 'DM Sans', sans-serif; white-space: nowrap;
+  }
+  .key-btn:hover { background: #7A5A10; }
+
+  /* Welcome */
+  .welcome {
+    background: var(--cream); border-radius: 18px; padding: 28px;
+    border: 1px solid var(--border); max-width: 520px;
+    animation: fadeUp .4s ease both;
+  }
+  .welcome h2 { font-family: 'DM Serif Display', serif; font-size: 22px; margin-bottom: 10px; }
+  .welcome p { font-size: 14px; color: var(--muted); line-height: 1.7; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+  /* Message rows */
+  .row { display: flex; gap: 10px; align-items: flex-start; animation: fadeUp .25s ease both; }
+  .row.user { flex-direction: row-reverse; }
+  .av {
+    width: 30px; height: 30px; border-radius: 50%; background: var(--dark);
+    display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0;
+  }
+  .row.user .av { background: var(--green-light); }
+  .bub { max-width: 74%; padding: 12px 16px; border-radius: 16px; font-size: 14px; line-height: 1.65; }
+  .row.bot .bub { background: var(--white); color: var(--dark); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+  .row.user .bub { background: var(--dark); color: #F7F2EA; border-bottom-right-radius: 4px; }
+
+  .dots { display: flex; gap: 5px; align-items: center; padding: 4px 0; }
+  .dots span { width: 7px; height: 7px; background: var(--muted); border-radius: 50%; animation: bop 1.1s infinite; }
+  .dots span:nth-child(2){animation-delay:.18s} .dots span:nth-child(3){animation-delay:.36s}
+  @keyframes bop{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+
+  /* Input */
+  .input-area { padding: 16px 28px 24px; border-top: 1px solid var(--border); flex-shrink: 0; }
+  .input-wrap {
+    display: flex; gap: 8px; align-items: center;
+    background: var(--cream); border: 1.5px solid var(--border);
+    border-radius: 12px; padding: 6px 6px 6px 16px; transition: border-color .2s;
+  }
+  .input-wrap:focus-within { border-color: var(--green); }
+  .txt-in {
+    flex: 1; background: none; border: none; outline: none;
+    font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--dark);
+    resize: none; max-height: 100px; line-height: 1.5;
+  }
+  .txt-in::placeholder { color: #C0B8AC; }
+  .send {
+    background: var(--dark); color: #F7F2EA; border: none; border-radius: 8px;
+    width: 38px; height: 38px; cursor: pointer; display: flex;
+    align-items: center; justify-content: center; font-size: 15px;
+    transition: background .2s, transform .1s;
+  }
+  .send:hover { background: var(--green); }
+  .send:active { transform: scale(.94); }
+  .send:disabled { background: #DDD; cursor: not-allowed; }
+
+  @media(max-width:700px){
+    html,body{overflow:auto}
+    .shell{grid-template-columns:1fr;height:auto;min-height:100vh}
+    .chips{flex-direction:row;flex-wrap:wrap}
+    .chip{font-size:11px;padding:7px 11px}
+    .chat{height:75vh}
+    .s-footer{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <aside class="sidebar">
+    <a href="https://readymag.website/u674646067/5499143/" class="back-link">← back to portfolio</a>
+    <div class="s-avatar">🌿</div>
+    <div class="s-name">Ask Ellen AI</div>
+    <div class="s-role">Marketing + UX Design</div>
+    <p class="s-bio">Hi! I'm an AI trained on <em>Ellen Lee's</em> full portfolio — her projects, research process, background, and personality. Ask me anything.</p>
+
+    <div class="chips-label">quick questions</div>
+    <div class="chips">
+      <button class="chip" onclick="ask('What projects has Ellen worked on?')">📁 What projects has she done?</button>
+      <button class="chip" onclick="ask('What are Ellen\'s skills and tools?')">🛠️ Skills & tools</button>
+      <button class="chip" onclick="ask('What makes Ellen\'s approach unique?')">✦ What makes her unique?</button>
+      <button class="chip" onclick="ask('What kind of roles is Ellen looking for?')">🔍 Is she open to work?</button>
+      <button class="chip" onclick="ask('Tell me about Ellen\'s background in cognitive science and digital humanities')">🧠 Her UCLA background</button>
+      <button class="chip" onclick="ask('Tell me a fun fact about Ellen')">🎨 Fun fact</button>
+    </div>
+
+    <div class="s-footer">
+      <div class="s-contact">
+        Reach Ellen directly:<br>
+        <a href="mailto:ellenyeaLee@gmail.com">ellenyeaLee@gmail.com</a><br>
+        Art: <a href="https://instagram.com/eyl.png" target="_blank">@eyl.png</a>
+      </div>
+      <div class="s-disclaimer">AI responses are based on Ellen's portfolio. For anything important, contact her directly.</div>
+    </div>
+  </aside>
+
+  <main class="chat">
+    <div class="topbar">
+      <div class="dot"></div>
+      <div class="topbar-txt"><strong>Ellen AI</strong> — powered by Google Gemini (free ✓)</div>
+    </div>
+
+    <div class="msgs" id="msgs">
+      <div class="setup" id="setup">
+        <strong>⚙️ One-time setup — get your free Gemini API key:</strong>
+        <div class="steps">
+          <div class="step"><div class="step-n">1</div><span>Go to <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a> and sign in with Google</span></div>
+          <div class="step"><div class="step-n">2</div><span>Click <strong>"Create API Key"</strong> → copy the key</span></div>
+          <div class="step"><div class="step-n">3</div><span>Paste it below — it's saved locally in your browser, no account needed</span></div>
+        </div>
+        <div class="key-row">
+          <input class="key-in" id="key-in" type="password" placeholder="Paste your Gemini API key (AIza...)"/>
+          <button class="key-btn" onclick="saveKey()">Save & Start ✦</button>
+        </div>
+      </div>
+
+      <div class="welcome">
+        <h2>Hey there! 👋</h2>
+        <p>I'm the AI version of Ellen — trained on her portfolio, projects, background, and personality. Ask me about her work, research process, what she studied at UCLA, or anything else you're curious about.</p>
+      </div>
+    </div>
+
+    <div class="input-area">
+      <div class="input-wrap">
+        <textarea class="txt-in" id="txt-in" rows="1"
+          placeholder="Ask about Ellen's work, skills, or background..."
+          onkeydown="onKey(event)" oninput="grow(this)"></textarea>
+        <button class="send" id="send-btn" onclick="send()">✦</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const SYSTEM = `You are the AI portfolio assistant for Ellen Lee. Answer warmly in first person as Ellen. Be genuine, concise, and a little personable. 2-5 sentences unless more detail is clearly needed.
+
+ABOUT: Ellen Lee | ellenyeaLee@gmail.com | Marketing + UX Design | Currently: Korean Community Interpreter @ Lake Washington School District | Seeking: Marketing & UX roles where research drives the work | Philosophy: research-first, "guessing is expensive" | Bilingual English/Korean (born Seoul, immigrated to WA at age 4) | Art IG: @eyl.png
+
+EDUCATION: UCLA 2024. Double major: Cognitive Science + Digital Humanities. Chose it to combine interest in human thought with analytics — goal is to understand and address users' needs effectively.
+
+TIMELINE: 2001 born Seoul → 2005 immigrated Washington USA → 2020 high school grad (COVID) → 2021 UCLA in person → 2024 UCLA grad (CogSci + DH) → 2025 first job @ New Engen
+
+INTERNSHIPS:
+1. Outfront Media (Jun–Aug 2024) Marketing Intern — OOH advertising company. Produced: Audience Sell Sheets (Scarborough Research data translated into brand narratives), Competitive Reports (competitor OOH spend analysis), Neighborhood Guides, Photosheets, Lookbooks, Blog Post for Brand Central Station, Spanish Media Kit Translation. Tools: InDesign, Photoshop, Excel, Scarborough, CORE, Mapbox. Key learning: best materials understood the audience, not just looked good.
+2. GS Engineering & Construction (Jun–Sept 2023) UX Design Intern — Platform Service Team. Problem: Xi Apartment app had features but low engagement; users wanted community connection, not just utility. Conducted market research + telesurveys. Designed community boards, neighbor connection, local announcements. Tools: Figma, Photoshop, After Effects, Zeplin.
+3. KPOP Foods — Marketing intern for Asian-American food brand.
+
+CASE STUDIES:
+1. Indeed x Bruin AdTeam (Oct 2022–Jun 2023) Media Planner — national ad competition. Gen Z focus groups. Key insight: Gen Z doesn't distrust job platforms, they distrust being misunderstood. Creative strategy "Let's Not Up" — honest, empathetic. Media plan: CTV, social, podcast, 25% on-target LA reach.
+2. LG Electronics (Dec 2024) Solo data analysis — US study abroad trends to inform LG R&D campus recruiting. Found mid-tier universities with tight-knit Korean student communities were best targets (not most prestigious). Recommendations: prioritized school list, career-trajectory scholarship positioning, retention pathway to FTE. Delivered English + Korean. Tools: Excel, Google Slides.
+3. Quizl — UX Design for quiz platform (engagement + usability)
+4. Study Break — Marketing for student wellness beverage go-to-market
+
+SKILLS: Research (user interviews, surveys, competitive analysis, Scarborough), Design (Figma, Adobe XD, Photoshop, After Effects, InDesign), Analytics (Excel, Google Analytics, SmartAsset, CORE, Mapbox), Strategy (media planning, brand strategy, copywriting, campaign management)
+
+CREATIVE/FUN: Logo redesign + website (JH Roofing), business card design (KCSC), mini zines, IG graphics, traditional art (portraits/figures/charcoal/paint), digital illustration, hand-painted upcycled tote bags (@eyl.png), dance, KPOP, cooking (views it as design iteration), psychology/behavioral economics nerd.
+
+INDUSTRIES: Entertainment, tech, nonprofit — as an immigrant these fields shaped her Korean identity; she wants to create more representation and inclusivity.`;
+
+let key = localStorage.getItem('ellen_gem') || '';
+let hist = [];
+let busy = false;
+
+window.onload = () => { if (!key) document.getElementById('setup').classList.add('show'); };
+
+function saveKey() {
+  const v = document.getElementById('key-in').value.trim();
+  if (!v) { alert('Please paste your Gemini API key.'); return; }
+  key = v;
+  localStorage.setItem('ellen_gem', v);
+  document.getElementById('setup').classList.remove('show');
+  addBot('API key saved! ✓ Go ahead — ask me anything about Ellen.');
+}
+
+function ask(q) { document.getElementById('txt-in').value = q; send(); }
+
+async function send() {
+  const el = document.getElementById('txt-in');
+  const msg = el.value.trim();
+  if (!msg || busy) return;
+  if (!key) { document.getElementById('setup').classList.add('show'); return; }
+
+  el.value = ''; grow(el);
+  addUser(msg);
+
+  // Build contents: system context + conversation history + new message
+  const contents = [];
+
+  if (hist.length === 0) {
+    // First message: inject system as preamble in the first user turn
+    contents.push({ role: 'user', parts: [{ text: SYSTEM + '\n\nNow, answer this question as Ellen: ' + msg }] });
+  } else {
+    // Subsequent messages: include system ack + full history
+    contents.push({ role: 'user', parts: [{ text: SYSTEM }] });
+    contents.push({ role: 'model', parts: [{ text: "Got it! I'm ready to answer as Ellen." }] });
+    hist.forEach(h => contents.push({ role: h.r, parts: [{ text: h.t }] }));
+    contents.push({ role: 'user', parts: [{ text: msg }] });
+  }
+
+  busy = true;
+  document.getElementById('send-btn').disabled = true;
+  const tid = addTyping();
+
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
+      { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents }) }
+    );
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Something went wrong — try again!';
+    removeTyping(tid);
+    addBot(reply);
+    hist.push({ r: 'user', t: msg }, { r: 'model', t: reply });
+    if (hist.length > 20) hist = hist.slice(-20);
+  } catch(e) {
+    removeTyping(tid);
+    const m = e.message?.toLowerCase() || '';
+    addBot('⚠️ ' + (m.includes('key') || m.includes('api') ? 'Invalid API key — check it and try again.' : 'Something went wrong. Try again!'));
+    console.error(e);
+  }
+
+  busy = false;
+  document.getElementById('send-btn').disabled = false;
+}
+
+function addUser(t) { add('user', '😊', t); }
+function addBot(t) { add('bot', '🌿', t); }
+
+function add(cls, emoji, t) {
+  const m = document.getElementById('msgs');
+  const d = document.createElement('div');
+  d.className = 'row ' + cls;
+  d.innerHTML = `<div class="av">${emoji}</div><div class="bub">${esc(t)}</div>`;
+  m.appendChild(d);
+  m.scrollTop = m.scrollHeight;
+}
+
+function addTyping() {
+  const m = document.getElementById('msgs');
+  const id = 'tp' + Date.now();
+  const d = document.createElement('div');
+  d.className = 'row bot'; d.id = id;
+  d.innerHTML = `<div class="av">🌿</div><div class="bub"><div class="dots"><span></span><span></span><span></span></div></div>`;
+  m.appendChild(d); m.scrollTop = m.scrollHeight;
+  return id;
+}
+
+function removeTyping(id) { const e = document.getElementById(id); if(e) e.remove(); }
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
+function onKey(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();} }
+function grow(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,100)+'px'; }
+</script>
+</body>
+</html>
